@@ -143,6 +143,7 @@ module.exports = async (client, message, args, Discord) => {
                                 break;
                             } else {
                                 let thisOne = recordProfileByMemberId.blacklist[i].replace(/[\\<>@#&!]/g, "");
+                                if (thisOne === '956991095210913852') continue;
                                 const roleById = newVoiceState.guild.roles.cache.find(r => r.id === thisOne);
                                 const user = client.users.cache.find(user => user.id === thisOne);
                                 if (roleById) {
