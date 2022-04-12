@@ -41,7 +41,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
         if (args.length === 1 && arrWithoutRepeated2.length === 0) {
             const msgEmbed = new MessageEmbed()
                 .setColor('#ff0000')
-                .setDescription(`${message.author.username}, I can't find **${message.content.substring(18)}**!1`)
+                .setDescription(`${message.author.username}, I can't find **${message.content.substring(18)}**!`)
             return message.reply({ embeds: [msgEmbed] })
                 .catch(console.error);
         }
