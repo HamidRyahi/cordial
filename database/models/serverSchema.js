@@ -11,6 +11,7 @@ const serverSchema = new mongoose.Schema({
     channelId: { type: String },
     cmdId: { type: String },
     helpId: { type: String },
+    lang: {type: String}
 })
 
 const model = mongoose.model('serverModels', serverSchema);

@@ -7,31 +7,31 @@ module.exports = async (client) => {
     // log all guilds that the bot is in
     client.guilds.cache.forEach(g => console.log(g.name));
     // When going back online, check if a channel is empty then delete it
-    // let allTempVCs;
-    // try {
-    //     allTempVCs = await profileModel2.find();
-    // } catch (err) { console.log(err); }
-    // if (allTempVCs.length !== 0) {
-    //     for (let i = 0; i < allTempVCs.length; i++) {
-    //         const mega = client.channels.cache.get(allTempVCs[i].channelId);
-    //         if (mega) {
-    //             if (mega.members.size < 1) {
-    //                 mega.delete()
-    //                     .then(async () => {
-    //                         await profileModel2.findOneAndDelete(
-    //                             { channelId: allTempVCs[i].channelId }
-    //                         ).catch(console.error);
-    //                     })
-    //                     .catch((err) => { console.log(err) });
-    //             }
-    //         } else {
-    //             // When going back online check if a channel is already deleted then delete temporary data from database
-    //             await profileModel2.findOneAndDelete(
-    //                 { channelId: allTempVCs[i].channelId }
-    //             ).catch(console.error);
-    //         }
-    //     }
-    // }
+    let allTempVCs;
+    try {
+        allTempVCs = await profileModel2.find();
+    } catch (err) { console.log(err); }
+    if (allTempVCs.length !== 0) {
+        for (let i = 0; i < allTempVCs.length; i++) {
+            const mega = client.channels.cache.get(allTempVCs[i].channelId);
+            if (mega) {
+                if (mega.members.size < 1) {
+                    mega.delete()
+                        .then(async () => {
+                            await profileModel2.findOneAndDelete(
+                                { channelId: allTempVCs[i].channelId }
+                            ).catch(console.error);
+                        })
+                        .catch((err) => { console.log(err) });
+                }
+            } else {
+                // When going back online check if a channel is already deleted then delete temporary data from database
+                await profileModel2.findOneAndDelete(
+                    { channelId: allTempVCs[i].channelId }
+                ).catch(console.error);
+            }
+        }
+    }
     // log all categories and their children channels
     let allServerProfiles;
     try {
@@ -46,6 +46,6 @@ module.exports = async (client) => {
         }
     }
 
-    // const ch = client.channels.cache.get('960098129523404840');
+    // const ch = client.channels.cache.get('968855365259239494');
     // console.log(ch.members.size);
 }
