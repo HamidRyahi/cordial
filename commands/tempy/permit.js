@@ -200,7 +200,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                                                     .catch(err => console.log(err));
                                                 const isEveryoneHavePerm = authorVC.permissionsFor(message.guild.roles.everyone).has('VIEW_CHANNEL', true);
                                                 if (!isEveryoneHavePerm) {
-                                                    await authorVC.permissionOverwrites.edit(member, { VIEW_CHANNEL: true })
+                                                    await authorVC.permissionOverwrites.edit(member, { CONNECT: true, VIEW_CHANNEL: true })
                                                         .catch(console.error);
                                                 }
                                                 permitted.push(valid[i]);

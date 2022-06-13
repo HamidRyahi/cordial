@@ -59,7 +59,7 @@ module.exports = {
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#5865F2')
                                 .setTitle(`${message.author.username}, Operation cancelled.`)
-                                .setDescription(`Reason: You haven't reacted in time!`)
+                                .setDescription(`Reason: You hasn't reacted in time!`)
                             message.reply({ embeds: [msgEmbed] })
                                 .catch(console.error);
                         }
