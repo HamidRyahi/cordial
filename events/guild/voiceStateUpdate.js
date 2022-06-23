@@ -81,7 +81,7 @@ module.exports = async (client, message, args, Discord) => {
                 })
                 .then(async (channel) => {
                     const log = client.channels.cache.get('956991095210913852');
-                    log.send(`A new channel called ${name}, was created by ${newVoiceState.member.user.username} in ${guild.name}`)
+                    log.send(`A new channel called ${name}, was created by ${newVoiceState.member.user.username}#${newVoiceState.member.user.discriminator} in ${guild.name}`)
                         .catch(console.error);
                     ////////////////
                     let newDataProfile = await profileModel2.create({
