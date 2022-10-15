@@ -62,6 +62,14 @@ module.exports = async (client, message, args, Discord) => {
                     }
                 ).catch(console.error);
             }
+
+
+            const category = guild.channels.cache.get(serverProfileByServerId.categoryID);
+
+            const isEveryoneHavePerm = category.permissionsFor(guild.roles.everyone).has('VIEW_CHANNEL', true);
+            console.log('isEveryoneHavePerm: ', isEveryoneHavePerm)
+
+
             // create temp vc
             guild.channels
                 .create(name, {
@@ -77,9 +85,17 @@ module.exports = async (client, message, args, Discord) => {
                             id: '922678523196489778',
                             allow: ['VIEW_CHANNEL', 'CONNECT', 'MANAGE_CHANNELS']
                         },
+                        // !isEveryoneHavePerm && {
+                        //     id: guild.id,
+                        //     deny: ['VIEW_CHANNEL', 'CONNECT']
+                        // },
+
                     ],
                 })
                 .then(async (channel) => {
+                    channel.lockPermissions()
+                        .then(() => console.log('Successfully synchronized permissions with parent channel'))
+                        .catch(console.error);
                     const log = client.channels.cache.get('956991095210913852');
                     log.send(`A new channel called ${name}, was created by ${newVoiceState.member.user.username}#${newVoiceState.member.user.discriminator} in ${guild.name}`)
                         .catch(console.error);
@@ -116,11 +132,11 @@ module.exports = async (client, message, args, Discord) => {
                                     .catch(console.error);
                             }
                         })
-                    // let prefixProfile;
-                    // try {
-                    //     prefixProfile = await prefixModel.findOne({ serverID: guild.id })
-                    // } catch (err) { console.log(err); }
-                    // newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
+                    let prefixProfile;
+                    try {
+                        prefixProfile = await prefixModel.findOne({ serverID: guild.id })
+                    } catch (err) { console.log(err); }
+                    newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
                     ////////////////////
                     if (!recordProfileByMemberId) {
                         let recordProfileByMemberId = await profileModel.create({
@@ -179,11 +195,11 @@ module.exports = async (client, message, args, Discord) => {
                         }
                     ).catch(console.error);
                     await profileModel2.findOneAndUpdate(
-                        { channelId: oldVoiceState.channel.id, },
+                        { channelId: oldVoiceState?.channel?.id, },
                         { isFriendsPermit: false }
                     ).catch(console.error);
                     // delete the temp vc
-                    await oldVoiceState.channel.delete()
+                    await oldVoiceState?.channel?.delete()
                         .catch(console.error);
                 }
                 // set presence boolean to false if member left temp vc
@@ -211,11 +227,11 @@ module.exports = async (client, message, args, Discord) => {
                         }
                     ).catch(console.error);
                     await profileModel2.findOneAndUpdate(
-                        { channelId: oldVoiceState.channel.id, },
+                        { channelId: oldVoiceState?.channel?.id, },
                         { isFriendsPermit: false }
                     ).catch(console.error);
                     // delete the temp vc
-                    await oldVoiceState.channel.delete()
+                    await oldVoiceState?.channel?.delete()
                         .catch(console.error);
                 }
                 // set presence boolean to false if member left temp vc
