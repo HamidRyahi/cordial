@@ -2,6 +2,8 @@ const profileModel = require('../../database/models/userSchema.js');
 const profileModel2 = require('../../database/models/tempSchema.js');
 const serverModel = require('../../database/models/serverSchema.js');
 const prefixModel = require('../../database/models/prefixSchema.js');
+const { MessageEmbed } = require('discord.js');
+
 module.exports = async (client, message, args, Discord) => {
     client.once("voiceStateUpdate", async (oldVoiceState, newVoiceState) => {
         if (!oldVoiceState.streaming && newVoiceState.streaming) return;
@@ -136,7 +138,14 @@ module.exports = async (client, message, args, Discord) => {
                     try {
                         prefixProfile = await prefixModel.findOne({ serverID: guild.id })
                     } catch (err) { console.log(err); }
-                    newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
+                    // newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
+
+
+                    // const msgEmbed = new MessageEmbed()
+                    //     .setColor('#00ff00')
+                    //     .setDescription(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
+                    // newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send({ embeds: [msgEmbed] })
+
                     ////////////////////
                     if (!recordProfileByMemberId) {
                         let recordProfileByMemberId = await profileModel.create({

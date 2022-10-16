@@ -6,6 +6,7 @@ module.exports = {
     description: 'This command is for making temp voice channels unvisible',
     async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
         const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+
         if (oneTap) {
             if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
                 const authorVC = message.member.voice.channel;
@@ -20,6 +21,24 @@ module.exports = {
                         return notTheOwner(message, authorVC, serverProfileByAuthorId);
                     }
                     if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel && dataProfileByChannelId.serverID === message.guildId) {
+
+
+                        if (!message.member.roles.cache.find(r => r.id === "1005997227010953308") && message.guild.id === '969646088254541894') {
+                            const msgEmbed = new MessageEmbed()
+                                .setColor('#ffff00')
+                                .setDescription(`You must have the <@&1005997227010953308> role to use this command!`)
+                            return message.reply({ embeds: [msgEmbed] })
+                                .catch(err => console.log(err));
+                        }
+
+
+
+
+
+
+
+
+
                         const isEveryoneHavePerm = authorVC.permissionsFor(message.guild.roles.everyone).has('VIEW_CHANNEL', true);
                         if (!isEveryoneHavePerm) {
                             const msgEmbed = new MessageEmbed()

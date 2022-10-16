@@ -20,15 +20,16 @@ module.exports = {
                         return notTheOwner(message, authorVC, serverProfileByAuthorId);
                     }
                     if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel) {
-                        const isEveryoneHavePerm = authorVC.permissionsFor(message.guild.roles.everyone).has('CONNECT', true);
-                        if (!isEveryoneHavePerm) {
+                        const isEveryoneHavePerm = authorVC.permissionsFor(message.guild.roles.everyone).has('CONNECT', false);
+                        console.log(isEveryoneHavePerm)
+                        if (isEveryoneHavePerm) {
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#ffff00')
                                 .setDescription(`**Reminder:** <#${authorVC.id}> is already locked! :lock:`)
                             return message.reply({ embeds: [msgEmbed] })
                                 .catch(err => console.log(err));
                         } else {
-                            return authorVC.permissionOverwrites.edit(role, { CONNECT: false })
+                            return authorVC.permissionOverwrites.edit(message.guild.roles.everyone, { CONNECT: false })
                                 .then(() => {
                                     const msgEmbed = new MessageEmbed()
                                         .setColor('#00ff00')

@@ -33,7 +33,7 @@ or:
                             return message.reply({ embeds: [msgEmbed] })
                                 .catch(err => console.log(err));
                         }
-                        if (/^[0-9]{18}$/g.test(newArg)) {
+                        if (/^[0-9]{18}$/g.test(newArg) || /^[0-9]{19}$/g.test(newArg)) {
                             const roleById = message.guild.roles.cache.find(r => r.id === newArg);
                             if (roleById) {
                                 const msgEmbed = new MessageEmbed()

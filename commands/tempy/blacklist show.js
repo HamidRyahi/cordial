@@ -3,6 +3,8 @@ const { MessageEmbed } = require('discord.js');
 const { showSender } = require("../../functions/msgFunctions.js");
 module.exports = {
     name: 'blacklist show',
+    aliases: ["bl show"],
+
     // cooldown: 10,
     description: 'This command is for showing the blacklist list',
     async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {

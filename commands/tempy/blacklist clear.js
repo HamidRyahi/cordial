@@ -2,6 +2,7 @@ const profileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'blacklist clear',
+    aliases: ["bl clear"],
     description: 'This command is for clearing the blacklist',
     async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
         if (recordProfileByAuthorId) {

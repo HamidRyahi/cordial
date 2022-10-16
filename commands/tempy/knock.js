@@ -78,7 +78,7 @@ You can knock a temp VC by providing it's name or ID or mentioning a random conn
                         .catch((err) => {
                             console.log(err);
                         });
-                } else if (/^[0-9]{18}$/g.test(newArg) && !userId && !channelById) {
+                } else if ((/^[0-9]{18}$/g.test(newArg) || /^[0-9]{19}$/g.test(newArg)) && !userId && !channelById) {
                     const msgEmbed = new MessageEmbed()
                         .setColor('#ff0000')
                         .setDescription(`${message.author.username}, I can't find **${args[0]}**`)

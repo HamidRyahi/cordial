@@ -28,7 +28,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
         let arrWithoutRepeated;
         arrWithoutRepeated = [...new Set(args)];
         function keep18Args(el) {
-            if (/^[0-9]{18}$/g.test(el)) {
+            if (/^[0-9]{18}$/g.test(el) || /^[0-9]{19}$/g.test(el)) {
                 return el;
             }
         }
