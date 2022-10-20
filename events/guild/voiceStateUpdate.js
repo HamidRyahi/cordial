@@ -20,6 +20,21 @@ module.exports = async (client, message, args, Discord) => {
         if (!oldVoiceState.selfVideo && newVoiceState.selfVideo) return;
         if (oldVoiceState.selfVideo && !newVoiceState.selfVideo) return;
         const guild = oldVoiceState.guild;
+        if (guild.id === '1019697365558505583') {
+            const inVoiceRole = guild.roles.cache.find(r => r.id === "1032345813608845442")
+            if (!oldVoiceState.channel && newVoiceState.channelId && inVoiceRole) {
+                newVoiceState.member.roles.add(inVoiceRole);
+                // console.log('joined vc')
+            }
+            if (oldVoiceState.channel !== null && !newVoiceState.channel && inVoiceRole) {
+                newVoiceState.member.roles.remove(inVoiceRole);
+                console.log('left vc')
+            }
+            if (oldVoiceState.channel && newVoiceState.channelId && inVoiceRole) {
+                newVoiceState.member.roles.add(inVoiceRole);
+                console.log('switched vc')
+            }
+        }
         let serverProfileByServerId;
         try {
             serverProfileByServerId = await serverModel.findOne({ serverID: guild.id });
