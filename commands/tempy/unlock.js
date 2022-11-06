@@ -22,7 +22,7 @@ module.exports = {
                     }
                     if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel && dataProfileByChannelId.serverID === message.guildId) {
                         const isEveryoneHavePerm = authorVC.permissionsFor(message.guild.roles.everyone).has('CONNECT', true);
-                        if (isEveryoneHavePerm) {
+                        if (isEveryoneHavePerm === true) {
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#ffff00')
                                 .setDescription(`**Reminder:** <#${authorVC.id}> is already unlocked! :unlock:`)
