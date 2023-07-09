@@ -180,7 +180,6 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setTitle(`<a:740852243812581446:934406830891876412> Processing... ${i + 1}/${valid.length}`)
                         botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
-
                     }
 
 

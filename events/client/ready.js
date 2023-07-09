@@ -5,7 +5,7 @@ module.exports = async (client) => {
     console.log(`Ready to serve in ${client.channels.cache.size} channels on ${client.guilds.cache.size} servers, for a total of ${client.users.cache.size} users.`);
     client.user.setActivity(`.vhelp | ${client.users.cache.size} users`, { type: "WATCHING" });
     // log all guilds that the bot is in
-    // client.guilds.cache.forEach(g => console.log(g.name));
+    client.guilds.cache.forEach(g => console.log(g.name, g.id, g.members.cache.size, g.ownerId));
     // When going back online, check if a channel is empty then delete it
     // let allTempVCs;
     // try {
