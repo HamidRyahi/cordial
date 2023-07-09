@@ -1,4 +1,4 @@
-const profileModel = require('../../database/models/userSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 const { showSender } = require("../../functions/msgFunctions.js");
 module.exports = {
@@ -7,23 +7,23 @@ module.exports = {
 
     // cooldown: 10,
     description: 'This command is for showing the blacklist list',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        if (recordProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        if (authorProfile) {
             let permitted = [];
-            if (recordProfileByAuthorId.blacklist.length === 0) {
+            if (authorProfile.blacklist.length === 0) {
                 const msgEmbed = new MessageEmbed()
                     .setColor('#808080')
                     .setTitle(`${message.author.username}, your blacklist is empty!`)
                 return message.reply({ embeds: [msgEmbed] })
                     .catch(console.error);
             }
-            let kolchi = recordProfileByAuthorId.blacklist;
+            let kolchi = authorProfile.blacklist;
             const msgEmbed = new MessageEmbed()
                 .setColor('#ffff00')
                 .setTitle(`<a:740852243812581446:934406830891876412> Loading...`)
             message.reply({ embeds: [msgEmbed] })
                 .then(async botMessage => {
-                    for (let i = 0; i < recordProfileByAuthorId.blacklist.length; i++) {
+                    for (let i = 0; i < authorProfile.blacklist.length; i++) {
                         for (let i = 0; i < kolchi.length; i++) {
                             kolchi[i] = kolchi[i].replace(/[\\<>@#&!]/g, "");
                         }

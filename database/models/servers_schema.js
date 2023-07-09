@@ -7,13 +7,13 @@ const serverSchema = new mongoose.Schema({
     owner: { type: String },
     members: { type: String },
     updates: { type: String },
+    preferredLocale: { type: String },
     categoryID: { type: String },
     channelId: { type: String },
     cmdId: { type: String },
     helpId: { type: String },
-    lang: {type: String}
 })
 
-const model = mongoose.model('serverModels', serverSchema);
+const model = mongoose.model('serversModels', serverSchema);
 
 module.exports = model;

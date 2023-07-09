@@ -1,33 +1,33 @@
 const { MessageEmbed } = require('discord.js');
-const profileModel2 = require('../../database/models/tempSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
 const { notInTempVc, noOwnerCurrently, noValidSetup } = require("../../functions/msgFunctions.js");
 module.exports = {
     name: 'owner',
     description: 'This command is for getting the owner of a temp vc',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
         if (oneTap) {
-            if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
+            if (oneTap.parentId === serverProfile.categoryID) {
                 const authorVC = message.member.voice.channel;
                 const authorId = message.author.id;
-                notInTempVc(authorVC, dataProfileByChannelId, serverProfileByAuthorId, message);
-                if (dataProfileByChannelId) {
-                    if (authorVC.id === dataProfileByChannelId.channelId && dataProfileByChannelId.memberId === "") {
-                        return noOwnerCurrently(dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId);
+                notInTempVc(authorVC, authorTempVC, serverProfile, message);
+                if (authorTempVC) {
+                    if (authorVC.id === authorTempVC.channelId && authorTempVC.memberId === "") {
+                        return noOwnerCurrently(authorTempVC, serverProfile, authorVC, message, authorId);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.serverID === message.guildId) {
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.serverID === message.guildId) {
                         const msgEmbed = new MessageEmbed()
                             .setColor('#5865F2')
-                            .setDescription(`<#${authorVC.id}> channel is owned by <@${dataProfileByChannelId.memberId}>`)
+                            .setDescription(`<#${authorVC.id}> channel is owned by <@${authorTempVC.memberId}>`)
                         return message.reply({ embeds: [msgEmbed] })
                             .catch(err => console.log(err));
                     }
                 }
             } else {
-                noValidSetup(message, prefixProfile);
+                noValidSetup(message, serverProfile.prefix);
             }
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
     }
 }

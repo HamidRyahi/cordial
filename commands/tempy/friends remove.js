@@ -1,10 +1,10 @@
-const profileModel = require('../../database/models/userSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'friends remove',
     // cooldown: 10,
     description: 'This command is for removing a member or role from your friends list',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
         const authorVC = message.member.voice.channel;
         if (args.length === 0) {
             const msgEmbed = new MessageEmbed()
@@ -12,11 +12,11 @@ module.exports = {
                 .setTitle(`${message.author.username}, you didn't provide any arguments.`)
                 .setDescription(`__correct usage:__
 You can mention or provide IDs of one or multiple members AND/OR roles:
-\`${prefixProfile.prefix}friends remove @member\`
-\`${prefixProfile.prefix}friends remove member_id\`
-\`${prefixProfile.prefix}friends remove @member1 @member2 member3_id member4_id\`
-\`${prefixProfile.prefix}friends remove @role1 @role2 role3_id role4_id\`
-\`${prefixProfile.prefix}friends remove @member1 member2_id @role1 role2_id\``)
+\`${serverProfile.prefix}friends remove @member\`
+\`${serverProfile.prefix}friends remove member_id\`
+\`${serverProfile.prefix}friends remove @member1 @member2 member3_id member4_id\`
+\`${serverProfile.prefix}friends remove @role1 @role2 role3_id role4_id\`
+\`${serverProfile.prefix}friends remove @member1 member2_id @role1 role2_id\``)
             return message.reply({ embeds: [msgEmbed] })
                 .catch(console.error);
         }
@@ -134,15 +134,15 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                 // }
 
                 for (let i = 0; i < arrWithoutRepeated2.length; i++) {
-                    if (recordProfileByAuthorId.closeList.includes(`<@${arrWithoutRepeated2[i]}>`) || recordProfileByAuthorId.closeList.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
+                    if (authorProfile.closeList.includes(`<@${arrWithoutRepeated2[i]}>`) || authorProfile.closeList.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
                         permitted.push(arrWithoutRepeated2[i]);
-                        if (recordProfileByAuthorId.closeList.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
-                            await profileModel.findOneAndUpdate(
+                        if (authorProfile.closeList.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
+                            await userProfileModel.findOneAndUpdate(
                                 { memberId: message.author.id, },
                                 { $pull: { closeList: `<@&${arrWithoutRepeated2[i]}>` } }
                             ).catch(console.error);
-                        } else if (recordProfileByAuthorId.closeList.includes(`<@${arrWithoutRepeated2[i]}>`)) {
-                            await profileModel.findOneAndUpdate(
+                        } else if (authorProfile.closeList.includes(`<@${arrWithoutRepeated2[i]}>`)) {
+                            await userProfileModel.findOneAndUpdate(
                                 { memberId: message.author.id, },
                                 { $pull: { closeList: `<@${arrWithoutRepeated2[i]}>` } }
                             ).catch(console.error);
@@ -155,8 +155,8 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                     }
 
 
-                    if (authorVC && dataProfileByChannelId) {
-                        if (authorVC.id === dataProfileByChannelId.channelId && message.author.id === dataProfileByChannelId.memberId) {
+                    if (authorVC && authorTempVC) {
+                        if (authorVC.id === authorTempVC.channelId && message.author.id === authorTempVC.memberId) {
                             let thisOne = arrWithoutRepeated2[i].replace(/[\\<>@#&!]/g, "");
                             const roleById = message.guild.roles.cache.find(r => r.id === thisOne);
                             const user = client.users.cache.find(user => user.id === thisOne);
@@ -187,7 +187,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setColor('#00ff00')
                             .setTitle(`${message.author.username}, you have successfully removed from your friends list:`)
                             .setDescription(`${permitted.join(" | ")}`)
-                            .setFooter(`To view your friends list you can type ${prefixProfile.prefix}friends show`)
+                            .setFooter(`To view your friends list you can type ${serverProfile.prefix}friends show`)
                         return botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
                     }
@@ -208,7 +208,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setColor('#ff0000')
                             .setTitle(`Not found in your friends list:`)
                             .setDescription(`${arrWithoutRepeated2.join(" | ")}`)
-                            .setFooter(`To view your friends list you can type: ${prefixProfile.prefix}friends show`)
+                            .setFooter(`To view your friends list you can type: ${serverProfile.prefix}friends show`)
                         return botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
                     }

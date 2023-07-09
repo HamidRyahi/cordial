@@ -1,26 +1,26 @@
-const profileModel2 = require('../../database/models/tempSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
 const { MessageEmbed } = require('discord.js');
 const { notInTempVc, noOwnerCurrently, noValidSetup, notTheOwner } = require("../../functions/msgFunctions.js");
 module.exports = {
     name: 'hide',
     description: 'This command is for making temp voice channels unvisible',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
 
         if (oneTap) {
-            if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
+            if (oneTap.parentId === serverProfile.categoryID) {
                 const authorVC = message.member.voice.channel;
                 const authorId = message.author.id;
                 const role = message.guild.roles.cache.find(r => r.name.includes('everyone'));
-                notInTempVc(authorVC, dataProfileByChannelId, serverProfileByAuthorId, message);
-                if (dataProfileByChannelId) {
-                    if (authorVC.id === dataProfileByChannelId.channelId && dataProfileByChannelId.memberId === "") {
-                        return noOwnerCurrently(dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId);
+                notInTempVc(authorVC, authorTempVC, serverProfile, message);
+                if (authorTempVC) {
+                    if (authorVC.id === authorTempVC.channelId && authorTempVC.memberId === "") {
+                        return noOwnerCurrently(authorTempVC, serverProfile, authorVC, message, authorId);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId !== authorId) {
-                        return notTheOwner(message, authorVC, serverProfileByAuthorId);
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId !== authorId) {
+                        return notTheOwner(message, authorVC, serverProfile);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel && dataProfileByChannelId.serverID === message.guildId) {
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId === authorId && authorTempVC.isInChannel && authorTempVC.serverID === message.guildId) {
 
 
                         if (!message.member.roles.cache.find(r => r.id === "1005997227010953308") && message.guild.id === '969646088254541894') {
@@ -63,10 +63,10 @@ module.exports = {
                     }
                 }
             } else {
-                noValidSetup(message, prefixProfile);
+                noValidSetup(message, serverProfile.prefix);
             }
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
     }
 }

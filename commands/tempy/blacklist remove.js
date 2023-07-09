@@ -1,10 +1,11 @@
-const profileModel = require('../../database/models/userSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'blacklist remove',
     // cooldown: 60,
+    aliases: ["bl remove"],
     description: 'This command is for removing a member or role from your blacklist',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
         const authorVC = message.member.voice.channel;
         if (args.length === 0) {
             const msgEmbed = new MessageEmbed()
@@ -12,11 +13,11 @@ module.exports = {
                 .setTitle(`${message.author.username}, you didn't provide any arguments.`)
                 .setDescription(`__correct usage:__
 You can mention or provide IDs of one or multiple members AND/OR roles:
-\`${prefixProfile.prefix}blacklist remove @member\`
-\`${prefixProfile.prefix}blacklist remove member_id\`
-\`${prefixProfile.prefix}blacklist remove @member1 @member2 member3_id member4_id\`
-\`${prefixProfile.prefix}blacklist remove @role1 @role2 role3_id role4_id\`
-\`${prefixProfile.prefix}blacklist remove @member1 member2_id @role1 role2_id\``)
+\`${serverProfile.prefix}blacklist remove @member\`
+\`${serverProfile.prefix}blacklist remove member_id\`
+\`${serverProfile.prefix}blacklist remove @member1 @member2 member3_id member4_id\`
+\`${serverProfile.prefix}blacklist remove @role1 @role2 role3_id role4_id\`
+\`${serverProfile.prefix}blacklist remove @member1 member2_id @role1 role2_id\``)
             return message.reply({ embeds: [msgEmbed] })
                 .catch(console.error);
         }
@@ -66,15 +67,15 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
 
 
                 for (let i = 0; i < arrWithoutRepeated2.length; i++) {
-                    if (recordProfileByAuthorId.blacklist.includes(`<@${arrWithoutRepeated2[i]}>`) || recordProfileByAuthorId.blacklist.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
+                    if (authorProfile.blacklist.includes(`<@${arrWithoutRepeated2[i]}>`) || authorProfile.blacklist.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
                         permitted.push(arrWithoutRepeated2[i]);
-                        if (recordProfileByAuthorId.blacklist.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
-                            await profileModel.findOneAndUpdate(
+                        if (authorProfile.blacklist.includes(`<@&${arrWithoutRepeated2[i]}>`)) {
+                            await userProfileModel.findOneAndUpdate(
                                 { memberId: message.author.id, },
                                 { $pull: { blacklist: `<@&${arrWithoutRepeated2[i]}>` } }
                             ).catch(console.error);
-                        } else if (recordProfileByAuthorId.blacklist.includes(`<@${arrWithoutRepeated2[i]}>`)) {
-                            await profileModel.findOneAndUpdate(
+                        } else if (authorProfile.blacklist.includes(`<@${arrWithoutRepeated2[i]}>`)) {
+                            await userProfileModel.findOneAndUpdate(
                                 { memberId: message.author.id, },
                                 { $pull: { blacklist: `<@${arrWithoutRepeated2[i]}>` } }
                             ).catch(console.error);
@@ -87,8 +88,8 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                     }
 
 
-                    if (authorVC && dataProfileByChannelId) {
-                        if (authorVC.id === dataProfileByChannelId.channelId && message.author.id === dataProfileByChannelId.memberId) {
+                    if (authorVC && authorTempVC) {
+                        if (authorVC.id === authorTempVC.channelId && message.author.id === authorTempVC.memberId) {
                             let thisOne = arrWithoutRepeated2[i].replace(/[\\<>@#&!]/g, "");
                             const roleById = message.guild.roles.cache.find(r => r.id === thisOne);
                             const user = client.users.cache.find(user => user.id === thisOne);
@@ -119,7 +120,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setColor('#00ff00')
                             .setTitle(`${message.author.username}, you have successfully removed from your blacklist:`)
                             .setDescription(`${permitted.join(" | ")}`)
-                            .setFooter(`To view your blacklist you can type ${prefixProfile.prefix}blacklist show`)
+                            .setFooter(`To view your blacklist you can type ${serverProfile.prefix}blacklist show`)
                         return botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
                     }
@@ -140,7 +141,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setColor('#ff0000')
                             .setTitle(`Not found in your blacklist:`)
                             .setDescription(`${arrWithoutRepeated2.join(" | ")}`)
-                            .setFooter(`To view your blacklist you can type: ${prefixProfile.prefix}blacklist show`)
+                            .setFooter(`To view your blacklist you can type: ${serverProfile.prefix}blacklist show`)
                         return botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
                     }

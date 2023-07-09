@@ -1,35 +1,35 @@
-const profileModel2 = require('../../database/models/tempSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
 const { MessageEmbed } = require('discord.js');
 const { notInTempVc, noOwnerCurrently, noValidSetup, notTheOwner } = require("../../functions/msgFunctions.js");
 module.exports = {
     name: 'transfer',
     description: 'This command is for transfering a temp vc to another member',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
         if (oneTap) {
-            if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
+            if (oneTap.parentId === serverProfile.categoryID) {
                 let newArg;
                 if (args.length !== 0)
                     newArg = args[0].replace(/[\\<>@#&!]/g, "");
                 const authorVC = message.member.voice.channel;
                 const authorId = message.author.id;
-                notInTempVc(authorVC, dataProfileByChannelId, serverProfileByAuthorId, message);
-                if (dataProfileByChannelId) {
-                    if (authorVC.id === dataProfileByChannelId.channelId && dataProfileByChannelId.memberId === "") {
-                        return noOwnerCurrently(dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId);
+                notInTempVc(authorVC, authorTempVC, serverProfile, message);
+                if (authorTempVC) {
+                    if (authorVC.id === authorTempVC.channelId && authorTempVC.memberId === "") {
+                        return noOwnerCurrently(authorTempVC, serverProfile, authorVC, message, authorId);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId !== authorId) {
-                        return notTheOwner(message, authorVC, serverProfileByAuthorId);
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId !== authorId) {
+                        return notTheOwner(message, authorVC, serverProfile);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel && dataProfileByChannelId.serverID === message.guildId) {
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId === authorId && authorTempVC.isInChannel && authorTempVC.serverID === message.guildId) {
                         if (args.length === 0) {
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#ff0000')
                                 .setTitle(`${message.author.username}, you didn't provide any arguments!`)
                                 .setDescription(`__correct usage:__
-\`${prefixProfile.prefix}transfer @UserName\`
+\`${serverProfile.prefix}transfer @UserName\`
 or:
-\`${prefixProfile.prefix}transfer id_of_member\``)
+\`${serverProfile.prefix}transfer id_of_member\``)
                             return message.reply({ embeds: [msgEmbed] })
                                 .catch(err => console.log(err));
                         }
@@ -55,15 +55,15 @@ or:
                                         return message.reply(`<a:865271503862759454:935269742778912829>`)
                                             .catch(err => console.log(err));
                                     }
-                                    if (member.voice.channel === null || dataProfileByChannelId.channelId !== member.voice.channel.id) {
+                                    if (member.voice.channel === null || authorTempVC.channelId !== member.voice.channel.id) {
                                         const msgEmbed = new MessageEmbed()
                                             .setColor('#ff0000')
                                             .setDescription(`**Notice:** <@${member.user.id}> is not connected to your voice channel!`)
                                         return message.reply({ embeds: [msgEmbed] })
                                             .catch(err => console.log(err));
                                     }
-                                    if (dataProfileByChannelId.channelId === member.voice.channel.id) {
-                                        await profileModel2.findOneAndUpdate(
+                                    if (authorTempVC.channelId === member.voice.channel.id) {
+                                        await tempVcProfileModel.findOneAndUpdate(
                                             { channelId: authorVC.id },
                                             {
                                                 memberId: member.user.id,
@@ -107,10 +107,10 @@ or:
                     }
                 }
             } else {
-                noValidSetup(message, prefixProfile);
+                noValidSetup(message, serverProfile.prefix);
             }
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
     }
 }

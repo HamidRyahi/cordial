@@ -1,39 +1,49 @@
-const profileModel = require('../../database/models/userSchema.js');
-const profileModel2 = require('../../database/models/tempSchema.js');
-const prefixModel = require('../../database/models/prefixSchema.js');
-const serverModel = require('../../database/models/serverSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
+const serversProfilesModel = require('../../database/models/servers_schema.js');
 const { MessageEmbed } = require('discord.js');
-
 
 const cooldowns = new Map();
 
 module.exports = async (client, Discord, message) => {
-    //
-    let prefixProfile;
+
+    // get server profile from db
+    let serverProfile;
     try {
-        prefixProfile = await prefixModel.findOne({ serverID: message.guild.id })
+        serverProfile = await serversProfilesModel.findOne({ serverID: message.guild.id })
     } catch (err) { console.log(err); }
-    //
+
+    // set profile prefix
     let prefix;
-    if (prefixProfile) {
-        prefix = prefixProfile.prefix;
+    if (serverProfile) {
+        prefix = serverProfile.prefix;
     } else {
         prefix = '.v';
     }
-    //
-    if (message.content.startsWith('.v') && !prefixProfile) {
-        let prefixProfile = await prefixModel.create({
+
+    // if server profile didn't found in db and user typed a valid command
+    if (message.content.startsWith('.v') && !serverProfile) {
+        let serverProfile = await serversProfilesModel.create({
             serverID: message.guild.id,
             serverName: message.guild.name,
-            prefix: '.v'
+            prefix: '.v',
+            owner: message.guild.ownerId,
+            members: message.guild.memberCount,
+            updates: message.guild.systemChannelId,
+            preferredLocale: message.guild.preferredLocale
         }).catch((err) => { console.log(err); });
-        prefixProfile.save().catch(console.error);
+
+        // save new profile data in db
+        serverProfile.save().catch(console.error);
     }
-    //
+
+    // fetch db latest updates
     try {
-        prefixProfile = await prefixModel.findOne({ serverID: message.guild.id });
+        serverProfile = await serversProfilesModel.findOne({ serverID: message.guild.id });
     } catch (err) { console.log(err); }
-    //
+
+
+    // if any member tagged bot reply with prefix info
     if (message.content === '<@!922678523196489778>' || message.content === '<@922678523196489778>') {
         const msgEmbed = new MessageEmbed()
             .setColor('#5865F2')
@@ -42,77 +52,63 @@ module.exports = async (client, Discord, message) => {
         return message.reply({ embeds: [msgEmbed] })
             .catch(console.error);
     }
-    //
+
+    // if random message or bot => return
     if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+    // set command author voice channel
     const authorVC = message.member.voice.channel;
-    let dataProfileByChannelId;
-    //
+    let authorTempVC;
+
+    // if command author is connected to a voice channel
     if (authorVC) {
         try {
-            dataProfileByChannelId = await profileModel2.findOne({ channelId: authorVC.id });
+            authorTempVC = await tempVcProfileModel.findOne({ channelId: authorVC.id });
         } catch (err) { console.log(err); }
     }
+
     //
-    const authorId = message.author.id;
-    let serverProfileByAuthorId;
+    let authorProfile;
     try {
-        serverProfileByAuthorId = await serverModel.findOne({ serverID: message.guild.id });
+        authorProfile = await userProfileModel.findOne({ memberId: message.author.id });
     } catch (err) { console.log(err); }
     //
-    if (!serverProfileByAuthorId) {
-        let newServerProfile = await serverModel.create({
-            serverID: message.guild.id,
-            serverName: message.guild.name,
-            owner: message.guild.ownerId,
-            members: message.guild.memberCount,
-            updates: message.guild.publicUpdatesChannelId,
-        }).catch((err) => { console.log(err) });
-        newServerProfile.save().catch((err) => { console.log(err) });
-        try {
-            serverProfileByAuthorId = await serverModel.findOne({ serverID: message.guild.id });
-        } catch (err) { console.log(err); }
-    }
-    //
-    let recordProfileByAuthorId;
-    try {
-        recordProfileByAuthorId = await profileModel.findOne({ memberId: message.author.id });
-    } catch (err) { console.log(err); }
-    //
-    if (!recordProfileByAuthorId) {
-        let recordProfileByAuthorId = await profileModel.create({
+    if (!authorProfile) {
+        let authorProfile = await userProfileModel.create({
             memberId: authorId,
             blacklist: [],
             closeList: [],
             name: `${message.author.username}'s VC`
         }).catch(console.error);
-        recordProfileByAuthorId.save()
+        authorProfile.save()
             .catch(console.error);
     }
-    //
     try {
-        recordProfileByAuthorId = await profileModel.findOne({ memberId: message.author.id });
+        authorProfile = await userProfileModel.findOne({ memberId: message.author.id });
     } catch (err) { console.log(err); }
-    //
+
+
+
+
+
+
     const args = message.content.slice(prefix.length).trim().split(/ +/g);
     let cmd = args.shift().toLowerCase();
-    //
     if (cmd === 'rename' && args.length === 0) {
         const msgEmbed = new MessageEmbed()
             .setColor('#ff0000')
             .setTitle(`${message.author.username}, you didn't provide any arguments!`)
             .setDescription(`__correct usage:__
-                \`${prefixProfile.prefix}rename new name\``)
+                \`${serverProfile.prefix}rename new name\``)
         return message.reply({ embeds: [msgEmbed] })
             .catch(err => console.log(err));
     }
-    //
     let valid = ['add', 'remove', 'show', 'clear'];
     if ((cmd === "blacklist" || cmd === "bl") && args.length !== 0) {
         if (valid.includes(args[0].toLowerCase())) {
             cmd = cmd + ' ' + args.shift().toLowerCase();
         }
     }
-    //
     let valid2 = ['add', 'remove', 'show', 'clear', 'permit'];
     if ((cmd === "friends" || cmd === "favorites" || cmd === "favs") && args.length !== 0) {
         if (valid2.includes(args[0].toLowerCase())) {
@@ -120,16 +116,13 @@ module.exports = async (client, Discord, message) => {
         }
     }
     const command = client.commands.get(cmd) || client.commands.find(a => a.aliases && a.aliases.includes(cmd));
-
     if (!command) return;
     if (!cooldowns.has(command.name)) {
         cooldowns.set(command.name, new Discord.Collection());
     }
-
     const current_time = Date.now();
     const time_stamps = cooldowns.get(command.name);
     const cooldown_amount = (command.cooldown) * 1000;
-
     if (time_stamps.has(message.author.id)) {
         const expiration_time = time_stamps.get(message.author.id) + cooldown_amount;
 
@@ -138,13 +131,13 @@ module.exports = async (client, Discord, message) => {
             return message.reply(`Please wait ${time_left.toFixed(0)} more seconds before using ${command.name}`)
         }
     }
-
-
     time_stamps.set(message.author.id, current_time);
     if (command) {
         const log = client.channels.cache.get('956991095210913852');
         log.send(message.content)
             .catch(console.error);
     }
-    if (command) command.execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId);
+
+
+    if (command) command.execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC);
 }

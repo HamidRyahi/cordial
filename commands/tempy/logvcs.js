@@ -1,13 +1,13 @@
-const serverModel = require('../../database/models/serverSchema.js');
+const serversModel = require('../../database/models/server_schema.js');
 module.exports = {
     name: 'logvcs',
     description: 'This command is for locking your temp vc',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
         if (message.author.id === '407241585722654724') {
             if (args.length === 0) {
                 let allCategories;
                 try {
-                    allCategories = await serverModel.find();
+                    allCategories = await serversModel.find();
                 } catch (err) { console.log(err); }
                 if (allCategories.length !== 0) {
                     for (let i = 0; i < allCategories.length; i++) {
@@ -23,7 +23,7 @@ module.exports = {
             if (args.length === 1) {
                 let targetServer;
                 try {
-                    targetServer = await serverModel.findOne({ serverID: args[0] });
+                    targetServer = await serversModel.findOne({ serverID: args[0] });
                 } catch (err) { console.log(err); }
                 const category = client.channels.cache.get(targetServer.categoryID);
                 if (category) {

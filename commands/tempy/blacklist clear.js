@@ -1,13 +1,13 @@
-const profileModel = require('../../database/models/userSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'blacklist clear',
     aliases: ["bl clear"],
     description: 'This command is for clearing the blacklist',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        if (recordProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        if (authorProfile) {
             const time = 30000;
-            if (recordProfileByAuthorId.blacklist.length === 0) {
+            if (authorProfile.blacklist.length === 0) {
                 const msgEmbed = new MessageEmbed()
                     .setColor('#808080')
                     .setTitle(`${message.author.username}, your blacklist is already empty.`)
@@ -30,7 +30,7 @@ module.exports = {
                     const collector = m.createReactionCollector({ filter, time: time });
                     collector.on('collect', async (r, u) => {
                         if (r.emoji.name === '✅') {
-                            await profileModel.findOneAndUpdate(
+                            await userProfileModel.findOneAndUpdate(
                                 { memberId: message.author.id, },
                                 { blacklist: [] }
                             ).catch(console.error);

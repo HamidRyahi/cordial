@@ -1,11 +1,11 @@
-const profileModel = require('../../database/models/userSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'friends add',
     // cooldown: 60,
     aliases: ["favs add", "favorites add"],
     description: 'This command is for adding a member or role to your friends list',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
         const authorVC = message.member.voice.channel;
         if (args.length === 0) {
             const msgEmbed = new MessageEmbed()
@@ -13,11 +13,11 @@ module.exports = {
                 .setTitle(`${message.author.username}, you didn't provide any arguments.`)
                 .setDescription(`__correct usage:__
 You can mention or provide IDs of one or multiple members AND/OR roles:
-\`${prefixProfile.prefix}friends add @member\`
-\`${prefixProfile.prefix}friends add member_id\`
-\`${prefixProfile.prefix}friends add @member1 @member2 member3_id member4_id\`
-\`${prefixProfile.prefix}friends add @role1 @role2 role3_id role4_id\`
-\`${prefixProfile.prefix}friends add @member1 member2_id @role1 role2_id\``)
+\`${serverProfile.prefix}friends add @member\`
+\`${serverProfile.prefix}friends add member_id\`
+\`${serverProfile.prefix}friends add @member1 @member2 member3_id member4_id\`
+\`${serverProfile.prefix}friends add @role1 @role2 role3_id role4_id\`
+\`${serverProfile.prefix}friends add @member1 member2_id @role1 role2_id\``)
             return message.reply({ embeds: [msgEmbed] })
                 .catch(console.error);
         }
@@ -164,13 +164,13 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
 
 
                 for (let i = 0; i < valid.length; i++) {
-                    if (!recordProfileByAuthorId.closeList.includes(valid[i])) {
+                    if (!authorProfile.closeList.includes(valid[i])) {
                         permitted.push(valid[i]);
-                        await profileModel.findOneAndUpdate(
+                        await userProfileModel.findOneAndUpdate(
                             { memberId: message.author.id, },
                             { $push: { closeList: valid[i] } }
                         ).catch(console.error);
-                        await profileModel.findOneAndUpdate(
+                        await userProfileModel.findOneAndUpdate(
                             { memberId: message.author.id, },
                             { $pull: { blacklist: valid[i] } }
                         ).catch(console.error);
@@ -184,9 +184,9 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
 
 
 
-                    if (authorVC && dataProfileByChannelId) {
-                        if (authorVC.id === dataProfileByChannelId.channelId && message.author.id === dataProfileByChannelId.memberId) {
-                            if (dataProfileByChannelId.isFriendsPermit) {
+                    if (authorVC && authorTempVC) {
+                        if (authorVC.id === authorTempVC.channelId && message.author.id === authorTempVC.memberId) {
+                            if (authorTempVC.isFriendsPermit) {
                                 let thisOne = valid[i].replace(/[\\<>@#&!]/g, "");
                                 const roleById = message.guild.roles.cache.find(r => r.id === thisOne);
                                 const user = client.users.cache.find(user => user.id === thisOne);
@@ -228,7 +228,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setColor('#00ff00')
                             .setTitle(`${message.author.username}, you have successfully added to your friends list:`)
                             .setDescription(`${permitted.join(" | ")}`)
-                            .setFooter(`To view your friends you can type ${prefixProfile.prefix}friends show`)
+                            .setFooter(`To view your friends you can type ${serverProfile.prefix}friends show`)
                         return botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
                     }
@@ -239,7 +239,7 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                             .setColor('#ff0000')
                             .setTitle(`Already added to your friends list:`)
                             .setDescription(`${valid.join(" | ")}`)
-                            .setFooter(`To view your friends list you can type: ${prefixProfile.prefix}friends show`)
+                            .setFooter(`To view your friends list you can type: ${serverProfile.prefix}friends show`)
                         return botMessage.edit({ embeds: [msgEmbed] })
                             .catch(console.error);
                     }

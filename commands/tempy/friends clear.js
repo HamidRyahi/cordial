@@ -1,12 +1,12 @@
-const profileModel = require('../../database/models/userSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
 const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'friends clear',
     description: 'This command is for clearing the friends list',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        if (recordProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        if (authorProfile) {
             const time = 30000;
-            if (recordProfileByAuthorId.closeList.length === 0) {
+            if (authorProfile.closeList.length === 0) {
                 const msgEmbed = new MessageEmbed()
                     .setColor('#808080')
                     .setTitle(`${message.author.username}, your friends list is already empty.`)
@@ -29,7 +29,7 @@ module.exports = {
                     const collector = m.createReactionCollector({ filter, time: time });
                     collector.on('collect', async (r, u) => {
                         if (r.emoji.name === '✅') {
-                            await profileModel.findOneAndUpdate(
+                            await userProfileModel.findOneAndUpdate(
                                 { memberId: message.author.id, },
                                 { closeList: [] }
                             ).catch(console.error);

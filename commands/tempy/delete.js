@@ -3,8 +3,8 @@ const { notInTempVc, noOwnerCurrently, noValidSetup } = require("../../functions
 module.exports = {
     name: 'delete',
     description: 'This command is for deteting an existing setup',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        const category = message.guild.channels.cache.get(serverProfileByAuthorId.categoryID);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        const category = message.guild.channels.cache.get(serverProfile.categoryID);
         // check if message author doesn't have ADMINISTRATOR perm
         if (!message.member.permissions.has("ADMINISTRATOR")) {
             const msgEmbed = new MessageEmbed()
@@ -16,9 +16,9 @@ module.exports = {
         }
         if (category) {
             const time = 30000;
-            const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
-            const cmdChannel = message.guild.channels.cache.get(serverProfileByAuthorId.cmdId);
-            const helpChannel = message.guild.channels.cache.get(serverProfileByAuthorId.helpId);
+            const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
+            const cmdChannel = message.guild.channels.cache.get(serverProfile.cmdId);
+            const helpChannel = message.guild.channels.cache.get(serverProfile.helpId);
             const msgEmbed = new MessageEmbed()
                 .setColor('#ff0000')
                 .setTitle(`${message.author.username} <a:873012688077340672:934934933540073472> Are your sure you want to delete the setup?`)
@@ -83,7 +83,7 @@ module.exports = {
 
 
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
     }
 }

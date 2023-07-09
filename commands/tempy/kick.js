@@ -4,32 +4,32 @@ module.exports = {
     name: 'kick',
     // cooldown: 60,
     description: 'This command is for kicking users or roles from your temp vc',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
         if (oneTap) {
-            if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
+            if (oneTap.parentId === serverProfile.categoryID) {
                 const authorVC = message.member.voice.channel;
                 const authorId = message.author.id;
-                notInTempVc(authorVC, dataProfileByChannelId, serverProfileByAuthorId, message);
-                if (dataProfileByChannelId) {
-                    if (authorVC.id === dataProfileByChannelId.channelId && dataProfileByChannelId.memberId === "") {
-                        return noOwnerCurrently(dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId);
+                notInTempVc(authorVC, authorTempVC, serverProfile, message);
+                if (authorTempVC) {
+                    if (authorVC.id === authorTempVC.channelId && authorTempVC.memberId === "") {
+                        return noOwnerCurrently(authorTempVC, serverProfile, authorVC, message, authorId);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId !== authorId) {
-                        return notTheOwner(message, authorVC, serverProfileByAuthorId);
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId !== authorId) {
+                        return notTheOwner(message, authorVC, serverProfile);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel) {
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId === authorId && authorTempVC.isInChannel) {
                         if (args.length === 0) {
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#ff0000')
                                 .setTitle(`${message.author.username}, You didn't provide any arguments!`)
                                 .setDescription(`__correct usage:__
 You can mention or provide IDs of one or multiple members AND/OR roles:
-\`${prefixProfile.prefix}kick @member\`
-\`${prefixProfile.prefix}kick member_id\`
-\`${prefixProfile.prefix}kick @member1 @member2 member3_id member4_id\`
-\`${prefixProfile.prefix}kick @role1 @role2 role3_id role4_id\`
-\`${prefixProfile.prefix}kick @member1 member2_id @role1 role2_id\``)
+\`${serverProfile.prefix}kick @member\`
+\`${serverProfile.prefix}kick member_id\`
+\`${serverProfile.prefix}kick @member1 @member2 member3_id member4_id\`
+\`${serverProfile.prefix}kick @role1 @role2 role3_id role4_id\`
+\`${serverProfile.prefix}kick @member1 member2_id @role1 role2_id\``)
                             return message.reply({ embeds: [msgEmbed] })
                                 .catch(err => console.log(err));
                         }
@@ -234,10 +234,10 @@ You can mention or provide IDs of one or multiple members AND/OR roles:
                     }
                 }
             } else {
-                noValidSetup(message, prefixProfile);
+                noValidSetup(message, serverProfile.prefix);
             }
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
     }
 }

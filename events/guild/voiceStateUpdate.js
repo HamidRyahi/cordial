@@ -1,7 +1,6 @@
-const profileModel = require('../../database/models/userSchema.js');
-const profileModel2 = require('../../database/models/tempSchema.js');
-const serverModel = require('../../database/models/serverSchema.js');
-const prefixModel = require('../../database/models/prefixSchema.js');
+const userProfileModel = require('../../database/models/userSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
+const serversModel = require('../../database/models/servers_schema.js');
 const { MessageEmbed } = require('discord.js');
 
 module.exports = async (client, message, args, Discord) => {
@@ -37,7 +36,7 @@ module.exports = async (client, message, args, Discord) => {
         }
         let serverProfileByServerId;
         try {
-            serverProfileByServerId = await serverModel.findOne({ serverID: guild.id });
+            serverProfileByServerId = await serversModel.findOne({ serverID: guild.id });
         } catch (err) { console.log(err); }
         // console.log(serverProfileByServerId);
         if (serverProfileByServerId === null) return;
@@ -50,7 +49,7 @@ module.exports = async (client, message, args, Discord) => {
             // get record of voiceStateMember
             let recordProfileByMemberId;
             try {
-                recordProfileByMemberId = await profileModel.findOne({ memberId: newVoiceState.member.user.id, });
+                recordProfileByMemberId = await userProfileModel.findOne({ memberId: newVoiceState.member.user.id, });
             } catch (err) { console.log(err); }
             // check if member already had a temp VC and get personlized settings
             if (recordProfileByMemberId) {
@@ -60,14 +59,14 @@ module.exports = async (client, message, args, Discord) => {
             // get data of voiceStateMember
             let dataProfileByMemberId;
             try {
-                dataProfileByMemberId = await profileModel2.findOne({
+                dataProfileByMemberId = await tempVcProfileModel.findOne({
                     memberId: oldVoiceState.id,
                     serverID: guild.id
                 });
             } catch (err) { console.log(err); }
             // check if member ditched his old temp vc
             if (dataProfileByMemberId) {
-                await profileModel2.findOneAndUpdate(
+                await tempVcProfileModel.findOneAndUpdate(
                     {
                         memberId: newVoiceState.member.user.id,
                         serverID: guild.id
@@ -117,7 +116,7 @@ module.exports = async (client, message, args, Discord) => {
                     log.send(`A new channel called ${name}, was created by ${newVoiceState.member.user.username}#${newVoiceState.member.user.discriminator} in ${guild.name}`)
                         .catch(console.error);
                     ////////////////
-                    let newDataProfile = await profileModel2.create({
+                    let newDataProfile = await tempVcProfileModel.create({
                         memberId: newVoiceState.member.user.id,
                         serverID: guild.id,
                         serverName: guild.name,
@@ -130,7 +129,7 @@ module.exports = async (client, message, args, Discord) => {
                     // Move new member to his temp VC
                     newVoiceState.member.voice.setChannel(channel.id)
                         .catch(async (err) => {
-                            await profileModel2.findOneAndUpdate(
+                            await tempVcProfileModel.findOneAndUpdate(
                                 { channelId: channel.id, },
                                 { isFriendsPermit: false }
                             ).catch(console.error);
@@ -138,7 +137,7 @@ module.exports = async (client, message, args, Discord) => {
                             channel.delete()
                                 .catch(console.error);
                             // remove dataArray of deleted temp vc
-                            const test = await profileModel2.findOne(
+                            const test = await tempVcProfileModel.findOne(
                                 {
                                     channelId: channel.id,
                                     serverID: guild.id
@@ -149,21 +148,10 @@ module.exports = async (client, message, args, Discord) => {
                                     .catch(console.error);
                             }
                         })
-                    let prefixProfile;
-                    try {
-                        prefixProfile = await prefixModel.findOne({ serverID: guild.id })
-                    } catch (err) { console.log(err); }
-                    // newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
-
-
-                    // const msgEmbed = new MessageEmbed()
-                    //     .setColor('#00ff00')
-                    //     .setDescription(`Congrats <@${newVoiceState.member.user.id}> for creating your temp VC!\nfor more help please type \`${prefixProfile.prefix}help\``)
-                    // newVoiceState.guild.channels.cache.get(serverProfileByServerId.cmdId).send({ embeds: [msgEmbed] })
 
                     ////////////////////
                     if (!recordProfileByMemberId) {
-                        let recordProfileByMemberId = await profileModel.create({
+                        let recordProfileByMemberId = await userProfileModel.create({
                             memberId: newVoiceState.member.user.id,
                             blacklist: [],
                             closeList: [],
@@ -212,13 +200,13 @@ module.exports = async (client, message, args, Discord) => {
                 // check if no member connected to temp vc
                 if (oldVoiceState.channel.members.size < 1) {
                     // remove dataArray of deleted temp vc
-                    await profileModel2.findOneAndDelete(
+                    await tempVcProfileModel.findOneAndDelete(
                         {
                             serverID: guild.id,
                             channelId: oldVoiceState.channel.id
                         }
                     ).catch(console.error);
-                    await profileModel2.findOneAndUpdate(
+                    await tempVcProfileModel.findOneAndUpdate(
                         { channelId: oldVoiceState?.channel?.id, },
                         { isFriendsPermit: false }
                     ).catch(console.error);
@@ -227,7 +215,7 @@ module.exports = async (client, message, args, Discord) => {
                         .catch(console.error);
                 }
                 // set presence boolean to false if member left temp vc
-                await profileModel2.findOneAndUpdate(
+                await tempVcProfileModel.findOneAndUpdate(
                     {
                         memberId: oldVoiceState.member.user.id,
                         serverID: guild.id,
@@ -244,13 +232,13 @@ module.exports = async (client, message, args, Discord) => {
                 // check if no member connected to temp vc
                 if (oldVoiceState.channel.members.size < 1) {
                     // remove dataArray of deleted temp vc
-                    await profileModel2.findOneAndDelete(
+                    await tempVcProfileModel.findOneAndDelete(
                         {
                             serverID: guild.id,
                             channelId: oldVoiceState.channel.id
                         }
                     ).catch(console.error);
-                    await profileModel2.findOneAndUpdate(
+                    await tempVcProfileModel.findOneAndUpdate(
                         { channelId: oldVoiceState?.channel?.id, },
                         { isFriendsPermit: false }
                     ).catch(console.error);
@@ -259,7 +247,7 @@ module.exports = async (client, message, args, Discord) => {
                         .catch(console.error);
                 }
                 // set presence boolean to false if member left temp vc
-                await profileModel2.findOneAndUpdate(
+                await tempVcProfileModel.findOneAndUpdate(
                     {
                         memberId: oldVoiceState.member.user.id,
                         serverID: guild.id,
@@ -273,7 +261,7 @@ module.exports = async (client, message, args, Discord) => {
         // set presence boolean to true if member joins back to his unclaimed yet voice channel
         if ((!oldVoiceState.channel && newVoiceState.channel) || (oldVoiceState.channel && newVoiceState.channel)) {
             // check if voice state member have a temp vc
-            await profileModel2.findOneAndUpdate(
+            await tempVcProfileModel.findOneAndUpdate(
                 {
                     memberId: newVoiceState.member.user.id,
                     serverID: guild.id,

@@ -1,15 +1,15 @@
-const profileModel2 = require('../../database/models/tempSchema.js');
-const serverModel = require('../../database/models/serverSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
+const serversModel = require('../../database/models/servers_schema.js');
 module.exports = async (client) => {
     console.log(`Logged in as ${client.user.tag}`);
     console.log(`Ready to serve in ${client.channels.cache.size} channels on ${client.guilds.cache.size} servers, for a total of ${client.users.cache.size} users.`);
     client.user.setActivity(`.vhelp | ${client.users.cache.size} users`, { type: "WATCHING" });
     // log all guilds that the bot is in
-    client.guilds.cache.forEach(g => console.log(g.name, g.id, g.members.cache.size, g.ownerId));
+    // client.guilds.cache.forEach(g => console.log(g.name, g.id, g.members.cache.size, g.ownerId));
     // When going back online, check if a channel is empty then delete it
     // let allTempVCs;
     // try {
-    //     allTempVCs = await profileModel2.find();
+    //     allTempVCs = await tempVcProfileModel.find();
     // } catch (err) { console.log(err); }
     // if (allTempVCs.length !== 0) {
     //     for (let i = 0; i < allTempVCs.length; i++) {
@@ -18,7 +18,7 @@ module.exports = async (client) => {
     //             if (mega.members.size < 1) {
     //                 mega.delete()
     //                     .then(async () => {
-    //                         await profileModel2.findOneAndDelete(
+    //                         await tempVcProfileModel.findOneAndDelete(
     //                             { channelId: allTempVCs[i].channelId }
     //                         ).catch(console.error);
     //                     })
@@ -26,7 +26,7 @@ module.exports = async (client) => {
     //             }
     //         } else {
     //             // When going back online check if a channel is already deleted then delete temporary data from database
-    //             await profileModel2.findOneAndDelete(
+    //             await tempVcProfileModel.findOneAndDelete(
     //                 { channelId: allTempVCs[i].channelId }
     //             ).catch(console.error);
     //         }
@@ -35,7 +35,7 @@ module.exports = async (client) => {
     // // log all categories and their children channels
     // let allServerProfiles;
     // try {
-    //     allServerProfiles = await serverModel.find();
+    //     allServerProfiles = await serversModel.find();
     // } catch (err) { console.log(err); }
     // if (allServerProfiles.length !== 0) {
     //     for (let i = 0; i < allServerProfiles.length; i++) {

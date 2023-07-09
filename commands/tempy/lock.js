@@ -3,23 +3,23 @@ const { notInTempVc, noOwnerCurrently, noValidSetup, notTheOwner } = require("..
 module.exports = {
     name: 'lock',
     description: 'This command is for locking your temp vc',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        // if (serverProfileByAuthorId) {
-        const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        // if ( serverProfile) {
+        const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
         if (oneTap) {
-            if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
+            if (oneTap.parentId === serverProfile.categoryID) {
                 const authorVC = message.member.voice.channel;
                 const authorId = message.author.id;
                 const role = message.guild.roles.cache.find(r => r.name.includes('everyone'));
-                notInTempVc(authorVC, dataProfileByChannelId, serverProfileByAuthorId, message);
-                if (dataProfileByChannelId) {
-                    if (authorVC.id === dataProfileByChannelId.channelId && dataProfileByChannelId.memberId === "") {
-                        return noOwnerCurrently(dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId);
+                notInTempVc(authorVC, authorTempVC, serverProfile, message);
+                if (authorTempVC) {
+                    if (authorVC.id === authorTempVC.channelId && authorTempVC.memberId === "") {
+                        return noOwnerCurrently(authorTempVC, serverProfile, authorVC, message, authorId);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId !== authorId) {
-                        return notTheOwner(message, authorVC, serverProfileByAuthorId);
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId !== authorId) {
+                        return notTheOwner(message, authorVC, serverProfile);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId === authorId && dataProfileByChannelId.isInChannel) {
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId === authorId && authorTempVC.isInChannel) {
                         const isEveryoneHavePerm = authorVC.permissionsFor(message.guild.roles.everyone).has('CONNECT', true);
                         console.log(isEveryoneHavePerm)
                         if (isEveryoneHavePerm === false) {
@@ -42,10 +42,10 @@ module.exports = {
                     }
                 }
             } else {
-                noValidSetup(message, prefixProfile);
+                noValidSetup(message, serverProfile.prefix);
             }
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
         // }
     }

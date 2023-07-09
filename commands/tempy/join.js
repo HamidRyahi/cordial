@@ -1,4 +1,4 @@
-const profileModel2 = require('../../database/models/tempSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
 const { MessageEmbed } = require('discord.js');
 const { notInTempVc, noOwnerCurrently, noValidSetup, notTheOwner } = require("../../functions/msgFunctions.js");
 const { joinVoiceChannel } = require('@discordjs/voice');
@@ -7,7 +7,7 @@ const { joinVoiceChannel } = require('@discordjs/voice');
 module.exports = {
     name: 'join',
     description: 'This command is for making temp voice channels unvisible',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
         if (message.author.id === '407241585722654724') {
             const channel = message.member.voice.channel;
             joinVoiceChannel({

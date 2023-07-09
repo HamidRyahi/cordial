@@ -1,24 +1,24 @@
 const { MessageEmbed } = require('discord.js');
-const profileModel2 = require('../../database/models/tempSchema.js');
+const tempVcProfileModel = require('../../database/models/tempSchema.js');
 const { notInTempVc, noOwnerCurrently, noValidSetup, notTheOwner } = require("../../functions/msgFunctions.js");
 module.exports = {
     name: 'friends permit',
     description: 'This command is for giving permission to your friends list to temp vc',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
-        const oneTap = message.guild.channels.cache.get(serverProfileByAuthorId.channelId);
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
+        const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
         if (oneTap) {
-            if (oneTap.parentId === serverProfileByAuthorId.categoryID) {
+            if (oneTap.parentId === serverProfile.categoryID) {
                 const authorVC = message.member.voice.channel;
                 const authorId = message.author.id;
-                notInTempVc(authorVC, dataProfileByChannelId, serverProfileByAuthorId, message);
-                if (dataProfileByChannelId) {
-                    if (authorVC.id === dataProfileByChannelId.channelId && dataProfileByChannelId.memberId === "") {
-                        return noOwnerCurrently(dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId);
+                notInTempVc(authorVC, authorTempVC, serverProfile, message);
+                if (authorTempVC) {
+                    if (authorVC.id === authorTempVC.channelId && authorTempVC.memberId === "") {
+                        return noOwnerCurrently(authorTempVC, serverProfile, authorVC, message, authorId);
                     }
-                    if (dataProfileByChannelId.channelId === authorVC.id && dataProfileByChannelId.memberId !== authorId) {
-                        return notTheOwner(message, authorVC, serverProfileByAuthorId);
+                    if (authorTempVC.channelId === authorVC.id && authorTempVC.memberId !== authorId) {
+                        return notTheOwner(message, authorVC, serverProfile);
                     }
-                    let friendsList = recordProfileByAuthorId.closeList;
+                    let friendsList = authorProfile.closeList;
                     if (friendsList.length === 0) {
                         const msgEmbed = new MessageEmbed()
                             .setColor('#808080')
@@ -26,7 +26,7 @@ module.exports = {
                         return message.reply({ embeds: [msgEmbed] })
                             .catch(err => console.log(err));
                     }
-                    if (dataProfileByChannelId.isFriendsPermit) {
+                    if (authorTempVC.isFriendsPermit) {
                         const msgEmbed = new MessageEmbed()
                             .setColor('#ffff00')
                             .setDescription(`**Notice:** You have already permitted your friends list!`)
@@ -42,7 +42,7 @@ module.exports = {
                         message.reply({ embeds: [msgEmbed] })
                             .then(async botMessage => {
                                 for (let i = 0; i < friendsList.length; i++) {
-                                    const voiceChannel = message.guild.channels.cache.get(dataProfileByChannelId.channelId);
+                                    const voiceChannel = message.guild.channels.cache.get(authorTempVC.channelId);
                                     if (!voiceChannel) {
                                         const msgEmbed = new MessageEmbed()
                                             .setColor('#ff0000')
@@ -78,7 +78,7 @@ module.exports = {
                                                 .setTitle(`<a:740852243812581446:934406830891876412> Giving Permission... ${i + 1}/${valid.length}`)
                                             botMessage.edit({ embeds: [msgEmbed] })
                                                 .catch(console.error);
-                                            await profileModel2.findOneAndUpdate(
+                                            await tempVcProfileModel.findOneAndUpdate(
                                                 { channelId: authorVC.id, },
                                                 { isFriendsPermit: true }
                                             ).catch(console.error);
@@ -86,7 +86,7 @@ module.exports = {
                                         const msgEmbed = new MessageEmbed()
                                             .setColor('#00ff00')
                                             .setTitle(`Successfully permitted your friends list to have access to your VC!`)
-                                            .setFooter(`To view your friends list you can type ${prefixProfile.prefix}friends show`)
+                                            .setFooter(`To view your friends list you can type ${serverProfile.prefix}friends show`)
                                         return botMessage.edit({ embeds: [msgEmbed] })
                                             .catch(err => console.log(err));
 
@@ -105,10 +105,10 @@ module.exports = {
                     }
                 }
             } else {
-                noValidSetup(message, prefixProfile);
+                noValidSetup(message, serverProfile.prefix);
             }
         } else {
-            noValidSetup(message, prefixProfile);
+            noValidSetup(message, serverProfile.prefix);
         }
     }
 }

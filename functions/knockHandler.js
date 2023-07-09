@@ -1,12 +1,12 @@
 const { MessageEmbed } = require('discord.js');
-const profileModel2 = require('../database/models/tempSchema.js');
+const tempVcProfileModel = require('../database/models/tempSchema.js');
 
-const knockHandler = async (theChannel, serverProfileByAuthorId, authorVC, message, authorId) => {
-    if (theChannel.parentId === serverProfileByAuthorId.categoryID) {
+const knockHandler = async (theChannel, serverProfile, authorVC, message, authorId) => {
+    if (theChannel.parentId === serverProfile.categoryID) {
 
         let tempProfileByChannelId;
         try {
-            tempProfileByChannelId = await profileModel2.findOne({ channelId: theChannel.id });
+            tempProfileByChannelId = await tempVcProfileModel.findOne({ channelId: theChannel.id });
         } catch (err) { console.log(err); }
 
         if (authorVC) {

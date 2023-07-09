@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 module.exports = {
     name: 'car',
     description: '',
-    async execute(client, message, args, Discord, recordProfileByAuthorId, prefixProfile, dataProfileByChannelId, serverProfileByAuthorId) {
+    async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
 
 
         fetch('https://api.popcat.xyz/car')

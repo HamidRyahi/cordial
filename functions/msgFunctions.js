@@ -1,16 +1,16 @@
 const { MessageEmbed } = require('discord.js');
 
-// message.guildId === serverProfileByAuthorId.serverID
-const notInTempVc = (authorVC, dataProfileByChannelId, serverProfileByAuthorId, message) => {
+
+const notInTempVc = (authorVC, authorTempVC, serverProfile, message) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#ff0000')
         .setTitle(`${message.author.username}, you are not in a temporary voice channel.`)
-        .setDescription(`To create one, please join <#${serverProfileByAuthorId.channelId}>`)
-    if (!authorVC || !dataProfileByChannelId) {
+        .setDescription(`To create one, please join <#${serverProfile.channelId}>`)
+    if (!authorVC || !authorTempVC) {
         return message.reply({ embeds: [msgEmbed] })
             .catch(err => console.log(err));
-    } else if (authorVC && dataProfileByChannelId) {
-        if (authorVC.id !== dataProfileByChannelId.channelId) {
+    } else if (authorVC && authorTempVC) {
+        if (authorVC.id !== authorTempVC.channelId) {
             return message.reply({ embeds: [msgEmbed] })
                 .catch(err => console.log(err));
         }
@@ -18,32 +18,32 @@ const notInTempVc = (authorVC, dataProfileByChannelId, serverProfileByAuthorId, 
 }
 
 
-const noOwnerCurrently = (dataProfileByChannelId, serverProfileByAuthorId, prefixProfile, authorVC, message, authorId) => {
+const noOwnerCurrently = (authorTempVC, serverProfile, authorVC, message, authorId) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#00ffff')
         .setDescription(`<#${authorVC.id}> **has no owner currently.**
-You can claim this channel by typing \`${prefixProfile.prefix}claim\` in the chat!`)
+You can claim this channel by typing \`${serverProfile.prefix}claim\` in the chat!`)
     return message.reply({ embeds: [msgEmbed] })
         .catch(err => console.log(err));
 }
 
 
-const notTheOwner = (message, authorVC, serverProfileByAuthorId) => {
+const notTheOwner = (message, authorVC, serverProfile) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#ff0000')
         .setDescription(`**${message.author.username}, you are not the owner of <#${authorVC.id}> channel.**
 
-To create yours, please join <#${serverProfileByAuthorId.channelId}>!`)
+To create yours, please join <#${serverProfile.channelId}>!`)
     return message.reply({ embeds: [msgEmbed] })
         .catch(err => console.log(err));
 }
 
 
-const noValidSetup = (message, prefixProfile) => {
+const noValidSetup = (message, prefix) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#ff0000')
         .setTitle(`No valid setup was found on this server!`)
-        .setDescription(`If you have sufficient permissions you can set the bot up by typing \`${prefixProfile.prefix}setup\``)
+        .setDescription(`If you have sufficient permissions you can set the bot up by typing \`${prefix}setup\``)
     return message.reply({ embeds: [msgEmbed] })
         .catch(err => console.log(err));
 }
@@ -80,7 +80,6 @@ ${descFooter}`)
         return botMessage.edit({ embeds: [msgEmbed] })
     }
 }
-
 
 
 module.exports = {
