@@ -1,4 +1,4 @@
-const serversModel = require('../../database/models/server_schema.js');
+const serversModel = require('../../database/models/servers_schema.js');
 module.exports = {
     name: 'logvcs',
     description: 'This command is for locking your temp vc',

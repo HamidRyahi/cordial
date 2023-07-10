@@ -134,7 +134,7 @@ module.exports = async (client, Discord, message) => {
     time_stamps.set(message.author.id, current_time);
     if (command) {
         const log = client.channels.cache.get('956991095210913852');
-        log.send(message.content)
+        log.send(`${message.author.username}: **${message.content}** in ${message.guild.name}`)
             .catch(console.error);
     }
 
