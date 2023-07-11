@@ -1,19 +1,19 @@
 const { MessageEmbed } = require('discord.js');
-const { notInTempVc, noOwnerCurrently, noValidSetup } = require("../../functions/msgFunctions.js");
+const { noValidSetup, noSufficientPerms } = require("../../functions/msgFunctions.js");
 module.exports = {
     name: 'delete',
     description: 'This command is for deteting an existing setup',
     async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
-        const category = message.guild.channels.cache.get(serverProfile.categoryID);
-        // check if message author doesn't have ADMINISTRATOR perm
-        if (!message.member.permissions.has("ADMINISTRATOR")) {
-            const msgEmbed = new MessageEmbed()
-                .setColor('#ff0000')
-                .setDescription(`You do not have sufficient permissions to use that command.`)
-            return message.reply({ embeds: [msgEmbed] })
-                .catch(console.error);
 
+        const category = message.guild.channels.cache.get(serverProfile.categoryID);
+
+
+        // 1. check if message author doesn't have ADMINISTRATOR perm
+        if (!message.member.permissions.has("ADMINISTRATOR") || !message.member.permissions.has("MANAGE_SERVER")) {
+            noSufficientPerms(message);
         }
+
+
         if (category) {
             const time = 30000;
             const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
@@ -51,7 +51,7 @@ module.exports = {
                                 .catch(console.error);
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#00ff00')
-                                .setTitle(`${message.author.username}, you have successfully deleted the setup!`)
+                                .setTitle(`${message.author.username}, you have successfully deleted the setup.`)
                             return m.edit({ embeds: [msgEmbed] })
                                 .catch(console.error);
                         } else if (r.emoji.name === '❌') {
@@ -66,14 +66,13 @@ module.exports = {
                         }
                     });
                     collector.on('end', collected => {
-                        console.log(`Collected ${collected.size} items`);
                         if (collected.size === 0) {
                             m.delete()
                                 .catch(error => console.error(':', error));
                             const msgEmbed = new MessageEmbed()
                                 .setColor('#5865F2')
                                 .setTitle(`${message.author.username}, Operation cancelled.`)
-                                .setDescription(`Reason: You haven't reacted in time!`)
+                                .setDescription(`Reason: You haven't reacted in time.`)
                             message.reply({ embeds: [msgEmbed] })
                                 .catch(console.error);
                         }

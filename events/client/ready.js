@@ -5,7 +5,16 @@ module.exports = async (client) => {
     console.log(`Ready to serve in ${client.channels.cache.size} channels on ${client.guilds.cache.size} servers, for a total of ${client.users.cache.size} users.`);
     client.user.setActivity(`.vhelp | ${client.users.cache.size} users`, { type: "WATCHING" });
     // log all guilds that the bot is in
-    // client.guilds.cache.forEach(g => console.log(g.name, g.id, g.members.cache.size, g.ownerId));
+    client.guilds.cache.forEach(async g => {
+        const userId = g.ownerId;
+        try {
+            const user = await client.users.fetch(userId);
+            console.log(`ServerName: ${g.name} - MemberSize:               ${g.members.cache.size}                  - Username: ${user.username}`);
+        } catch (error) {
+            console.log('Unable to fetch user.');
+        }
+
+    })
     // When going back online, check if a channel is empty then delete it
     // let allTempVCs;
     // try {

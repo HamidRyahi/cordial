@@ -6,6 +6,7 @@ const { MessageEmbed } = require('discord.js');
 const cooldowns = new Map();
 
 module.exports = async (client, Discord, message) => {
+    console.log(message.content)
 
     // get server profile from db
     let serverProfile;
@@ -75,7 +76,7 @@ module.exports = async (client, Discord, message) => {
     //
     if (!authorProfile) {
         let authorProfile = await userProfileModel.create({
-            memberId: authorId,
+            memberId: message.author.id,
             blacklist: [],
             closeList: [],
             name: `${message.author.username}'s VC`
@@ -137,7 +138,5 @@ module.exports = async (client, Discord, message) => {
         log.send(`${message.author.username}: **${message.content}** in ${message.guild.name}`)
             .catch(console.error);
     }
-
-
     if (command) command.execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC);
 }

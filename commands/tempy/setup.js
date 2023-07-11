@@ -1,37 +1,39 @@
 const serversModel = require('../../database/models/servers_schema.js');
 const { MessageEmbed } = require('discord.js');
+const { noSufficientPerms } = require("../../functions/msgFunctions.js");
+
 module.exports = {
     name: 'setup',
     description: 'This command is for setting up the bot',
     async execute(client, message, args, Discord, authorProfile, serverProfile, authorTempVC) {
-        // check if message author doesn't have ADMINISTRATOR perm
-        if (!message.member.permissions.has("ADMINISTRATOR") || !message.member.permissions.has("MANAGE_SERVER")) {
-            const msgEmbed = new MessageEmbed()
-                .setColor('#ff0000')
-                .setDescription(`You do not have sufficient permissions to use that command.`)
-            return message.reply({ embeds: [msgEmbed] })
-                .catch(console.error);
 
-        }
         const oneTap = message.guild.channels.cache.get(serverProfile.channelId);
         const category = message.guild.channels.cache.get(serverProfile.categoryID);
         const commandsChannel = message.guild.channels.cache.get(serverProfile.cmdId);
-        // check if there is a valid existing setup 
+
+        // 1. check if message author doesn't have ADMINISTRATOR perm
+        if (!message.member.permissions.has("ADMINISTRATOR") || !message.member.permissions.has("MANAGE_SERVER")) {
+            noSufficientPerms(message);
+        }
+
+
+        // 2. check if there is a valid existing setup 
         if (oneTap && category && commandsChannel) {
-            if (oneTap.parentId === serverProfile.categoryID && commandsChannel.parentId === serverProfile.categoryID) {
+            if (oneTap.parentId === category.id && commandsChannel.parentId === category.id) {
                 const msgEmbed = new MessageEmbed()
                     .setColor('#ffff00')
-                    .setTitle(`Reminder: There is already an active setup on this server!`)
+                    .setTitle(`Note: There is an already active setup on this server.`)
                     .setDescription(`
-Category: ${category.name.toUpperCase()}
+Category: **${category.name.toUpperCase()}**
 Commands text channel: <#${commandsChannel.id}>
-VC generator: <#${oneTap.id}>               
-`)
+VCs generator: <#${oneTap.id}>               `)
                 return message.reply({ embeds: [msgEmbed] })
                     .catch(console.error);
             }
         }
-        // check if the category is deleted or got renamed and the vc creator and cmd channel are deleted
+
+
+        // 3. check if the category is deleted or got renamed and the vc creator and cmd channel are deleted
         if (!category || (category.name !== 'CORDIAL' && !oneTap && !commandsChannel)) {
             const msgEmbed = new MessageEmbed()
                 .setColor('#ffff00')
@@ -146,9 +148,9 @@ VC generator: <#${oneTap.id}>
                                                         .setColor('#00ff00')
                                                         .setTitle(`Setup completed successfully!`)
                                                         .setDescription(`
-Category: ${parent.name.toUpperCase()}
+Category: **${parent.name.toUpperCase()}**
 Commands text channel: <#${textChannel.id}>
-VC generator: <#${voiceChannel.id}>               `)
+VCs generator: <#${voiceChannel.id}>`)
                                                     botMessage.edit({ embeds: [msgEmbed] })
                                                         .catch(console.error);
                                                 })
@@ -162,8 +164,10 @@ VC generator: <#${voiceChannel.id}>               `)
                 })
                 .catch(console.error)
         }
-        // check if only vc generator is unvalid
-        if (category && !oneTap && commandsChannel) {
+
+
+        // 4. check if only vc generator is unvalid
+        if (category && commandsChannel && !oneTap) {
             const msgEmbed = new MessageEmbed()
                 .setColor('#ffff00')
                 .setTitle(`<a:740852243812581446:934406830891876412> Processing...`)
@@ -192,10 +196,9 @@ VC generator: <#${voiceChannel.id}>               `)
                                         .setColor('#00ff00')
                                         .setTitle(`Setup completed successfully!`)
                                         .setDescription(`
-Category: ${category.name.toUpperCase()}
+Category: **${category.name.toUpperCase()}**
 Commands text channel: <#${commandsChannel.id}>
-VC generator: <#${voiceChannel.id}>               
-`)
+VCs generator: <#${voiceChannel.id}>`)
                                     return botMessage.edit({ embeds: [msgEmbed] })
                                         .catch(console.error);
                                 })
@@ -205,7 +208,9 @@ VC generator: <#${voiceChannel.id}>
                 })
                 .catch(console.error)
         }
-        // check if only cmd channel is unvalid
+
+
+        // 5. check if only cmd channel is unvalid
         if (category && oneTap && !commandsChannel) {
             // create a new cmd channel
             const msgEmbed = new MessageEmbed()
@@ -228,10 +233,9 @@ VC generator: <#${voiceChannel.id}>
                                         .setColor('#00ff00')
                                         .setTitle(`Setup completed successfully!`)
                                         .setDescription(`
-Category: ${category.name.toUpperCase()}
+Category: **${category.name.toUpperCase()}**
 Commands text channel: <#${textChannel.id}>
-VC generator: <#${oneTap.id}>               
-`)
+VCs generator: <#${oneTap.id}>`)
                                     return botMessage.edit({ embeds: [msgEmbed] })
                                         .catch(console.error);
                                 })
@@ -241,7 +245,9 @@ VC generator: <#${oneTap.id}>
                 })
                 .catch(console.error)
         }
-        // check if only the category is valid and it should still has the "CORDIAL" name
+
+
+        // 6. check if only the category is valid and it should still has the "CORDIAL" name
         if (category && category.name === 'CORDIAL' && !oneTap && !commandsChannel) {
             // create a new vc generator and a new cmd channel
             const msgEmbed = new MessageEmbed()
@@ -280,10 +286,9 @@ VC generator: <#${oneTap.id}>
                                                 .setColor('#00ff00')
                                                 .setTitle(`Setup completed successfully!`)
                                                 .setDescription(`
-Category: ${category.name.toUpperCase()}
+Category: **${category.name.toUpperCase()}**
 Commands text channel: <#${textChannel.id}>
-VC generator: <#${voiceChannel.id}>               
-`)
+VCs generator: <#${voiceChannel.id}>`)
                                             return botMessage.edit({ embeds: [msgEmbed] })
                                                 .catch(console.error);
                                         })
@@ -295,5 +300,7 @@ VC generator: <#${voiceChannel.id}>
                 })
                 .catch(console.error)
         }
+
+
     }
 }

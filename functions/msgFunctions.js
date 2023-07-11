@@ -1,6 +1,17 @@
 const { MessageEmbed } = require('discord.js');
 
 
+
+const noSufficientPerms = (message) => {
+    const msgEmbed = new MessageEmbed()
+        .setColor('#ff0000')
+        .setDescription(`You do not have sufficient permissions to use this command.`)
+    return message.reply({ embeds: [msgEmbed] })
+        .catch(console.error);
+}
+
+
+
 const notInTempVc = (authorVC, authorTempVC, serverProfile, message) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#ff0000')
@@ -18,6 +29,7 @@ const notInTempVc = (authorVC, authorTempVC, serverProfile, message) => {
 }
 
 
+
 const noOwnerCurrently = (authorTempVC, serverProfile, authorVC, message, authorId) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#00ffff')
@@ -26,6 +38,7 @@ You can claim this channel by typing \`${serverProfile.prefix}claim\` in the cha
     return message.reply({ embeds: [msgEmbed] })
         .catch(err => console.log(err));
 }
+
 
 
 const notTheOwner = (message, authorVC, serverProfile) => {
@@ -39,14 +52,16 @@ To create yours, please join <#${serverProfile.channelId}>!`)
 }
 
 
+
 const noValidSetup = (message, prefix) => {
     const msgEmbed = new MessageEmbed()
         .setColor('#ff0000')
-        .setTitle(`No valid setup was found on this server!`)
+        .setTitle(`No valid setup was found on this server.`)
         .setDescription(`If you have sufficient permissions you can set the bot up by typing \`${prefix}setup\``)
     return message.reply({ embeds: [msgEmbed] })
         .catch(err => console.log(err));
 }
+
 
 
 const showSender = (kolchi, permitted, message, type, botMessage, i) => {
@@ -82,10 +97,13 @@ ${descFooter}`)
 }
 
 
+
+
 module.exports = {
     notInTempVc: notInTempVc,
     noOwnerCurrently: noOwnerCurrently,
     noValidSetup: noValidSetup,
     showSender: showSender,
-    notTheOwner: notTheOwner
+    notTheOwner: notTheOwner,
+    noSufficientPerms: noSufficientPerms
 };
